@@ -1,0 +1,41 @@
+
+* Level 1
+
+org-margin mode allows to "outdent" org headlines by moving leading
+stars into the margin and transform them into markers depending on the
+chosen style among 'stars (regular org style), 'H-txt (current style)
+and 'H-svg (using svg-lib tags). To increase/decrease level, easiest
+method is to use =M-left= and =M-right= because stars are not really
+accessible anymore.
+
+** Level 2
+
+User can also define custom margin markers for each header level. Size
+of the left margin is then computed to be wide enough to accomodate
+all markers.
+
+*** Level 3
+
+It is possible to provide custom regex to add specific marker in the
+margin. Org-margin comes with two markers for marking source and quote
+blocks, but any svg-lib tags or regular text can be used as well.
+
+#+begin_src emacs-lisp
+
+(require 'org-margin)
+(org-margin-mode 1)
+
+#+end_src
+
+#+begin_quote 
+   Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+   eiusmod tempor incididunt ut labore et dolore magna aliqua.
+#+end_quote
+
+**** Level 4
+
+A specific bookmark function is provided such as to take advantage of the margin (instead of the fringe).
+
+* Screenshot
+
+[[file:org-margin.png]]
