@@ -5,7 +5,7 @@
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/nano-agenda
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "27.1") ("svg-lib"))
 ;; Keywords: convenience, org-mode, org-agenda
 
 ;; This file is not part of GNU Emacs.
@@ -35,10 +35,15 @@
 ;; Version 0.1.0
 ;; - Initial release
 ;;
-;;; Code 
-;; (require 'svg-lib)
+;;; Code
+(require 'svg-lib)
+(require 'bookmark)
 
-(defvar org-margin-headers
+(defgroup org-margin nil
+  "org margin"
+  :group 'convenience)
+
+(defcustom org-margin-headers
   (list (cons 'stars (list (propertize "     *" 'face 'org-level-1)
                            (propertize "    **" 'face 'org-level-2)
                            (propertize "   ***" 'face 'org-level-3)
@@ -51,35 +56,52 @@
                            (propertize "H4" 'face '(font-lock-comment-face default))
                            (propertize "H5" 'face '(font-lock-comment-face default))
                            (propertize "H6" 'face '(font-lock-comment-face default))))
-        ;; Uncomment if you want svg-tags and have svg-lib installed
-        ;; (cons 'H-svg (list (svg-lib-tag "H1" 'org-level-1)
-        ;;                    (svg-lib-tag "H2" 'org-level-2)
-        ;;                    (svg-lib-tag "H3" 'org-level-3)
-        ;;                    (svg-lib-tag "H4" 'org-level-4)
-        ;;                    (svg-lib-tag "H5" 'org-level-5)
-        ;;                    (svg-lib-tag "H6" 'org-level-6)))
-        ))
+        (cons 'H-svg (list (svg-lib-tag "H1" 'org-level-1)
+                            (svg-lib-tag "H2" 'org-level-2)
+                            (svg-lib-tag "H3" 'org-level-3)
+                            (svg-lib-tag "H4" 'org-level-4)
+                            (svg-lib-tag "H5" 'org-level-5)
+                            (svg-lib-tag "H6" 'org-level-6))))
+  "List of marker sets for header"
+
+  :type '(repeat (cons symbol (repeat (choice (string :tag "String")
+                                              (sexp :tag "Image")))))
+  :group 'org-margin)
 
 (defcustom org-margin-markers
   (list (cons "\\(#\\+begin_src\\)"
-              (propertize " " 'face 'font-lock-comment-face))
+              (propertize " " 'face '(font-lock-comment-face bold)))
         (cons "\\(#\\+begin_quote\\)"
-              (propertize " " 'face 'font-lock-comment-face)))
+              (propertize " " 'face '(font-lock-comment-face bold))))
     "A list of (regex . marker) that put a marker in the margin for
- each match")
-  
+ each match"
+
+    :type '(repeat (cons regexp (choice (string :tag "String")
+                                        (sexp :tag "Image"))))
+    :group 'org-margin)
+
 (defcustom org-margin-headers-set 'H-txt
   "Headers set to use in the margin. org-margin-mode needs to be
-activated for changes to take effect.")
+activated for changes to take effect."
+  :type '(choice (const :tag "Org (stars)" stars)
+                 ;; (const :tag "HTML (svg)" H-svg)
+                 (const :tag "HTML (text)" H-txt))
+  :group 'org-margin)
 
-(defcustom org-margin-bookmark
-  (propertize "  " 'face 'error)
-  "Bookmark symbol")
+(defcustom org-margin-bookmark (propertize "  " 'face '(error bold))
+  "Bookmark symbol"
+  :type '(choice (string :tag "String")
+                 (sexp :tag "Image"))
+  :group 'org-margin)
+  
   
 (defcustom org-margin-max-level 6
-  "Maximum header level to consider")
+  "Maximum header level to consider"
+  :type 'integer
+  :group 'org-margin)
+  
 
-(defun org-margin--set-margin-mark (orig-fun)
+(defun org-margin--set-margin-mark (_orig-fun)
    "Apply a colorized overlay to the bookmarked location.
  See user option `bookmark-fringe-mark'."
    (let ((bm (make-overlay (pos-bol) (1+ (pos-bol)))))
@@ -173,6 +195,7 @@ activated for changes to take effect.")
               :around #'org-margin--set-margin-mark)
   (font-lock-update))
 
+;;;###autoload
 (define-minor-mode org-margin-mode
   "org-margin mode allows to outdent headers by moving leading
  stars into the margin and transform them into markers depending
