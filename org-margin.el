@@ -5,7 +5,7 @@
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/nano-agenda
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "27.1") ("svg-lib"))
+;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: convenience, org-mode, org-agenda
 
 ;; This file is not part of GNU Emacs.
@@ -32,11 +32,14 @@
 ;;
 ;;; NEWS:
 ;;
+;; Version 0.2.0
+;;  - Cleaner mode exit
+;;  - Removed svg lib dependency
+;;
 ;; Version 0.1.0
 ;; - Initial release
 ;;
 ;;; Code
-(require 'svg-lib)
 (require 'bookmark)
 
 (defgroup org-margin nil
@@ -56,12 +59,14 @@
                            (propertize "H4" 'face '(font-lock-comment-face default))
                            (propertize "H5" 'face '(font-lock-comment-face default))
                            (propertize "H6" 'face '(font-lock-comment-face default))))
-        (cons 'H-svg (list (svg-lib-tag "H1" 'org-level-1)
-                            (svg-lib-tag "H2" 'org-level-2)
-                            (svg-lib-tag "H3" 'org-level-3)
-                            (svg-lib-tag "H4" 'org-level-4)
-                            (svg-lib-tag "H5" 'org-level-5)
-                            (svg-lib-tag "H6" 'org-level-6))))
+        ;; Uncomment if you want to use svg tags for markers (you'll to load svg-lib)
+        ;; (cons 'H-svg (list (svg-lib-tag "H1" 'org-level-1)
+        ;;                     (svg-lib-tag "H2" 'org-level-2)
+        ;;                     (svg-lib-tag "H3" 'org-level-3)
+        ;;                     (svg-lib-tag "H4" 'org-level-4)
+        ;;                     (svg-lib-tag "H5" 'org-level-5)
+        ;;                     (svg-lib-tag "H6" 'org-level-6)))
+        )
   "List of marker sets for header"
 
   :type '(repeat (cons symbol (repeat (choice (string :tag "String")
