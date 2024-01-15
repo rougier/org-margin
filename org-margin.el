@@ -117,15 +117,25 @@ activated for changes to take effect."
   (interactive)
   
   ;; Restore margin
-  (set-window-margins (selected-window) 0)
-  (setq left-margin-width nil)
-
+  (set-window-margins (selected-window) org-margin--left-margin-width)
+  (setq left-margin-width org-margin--left-margin-width
+        font-lock-extra-managed-props org-margin--font-lock-extra-managed-props
+        font-lock-keywords org-margin--font-lock-keywords)
+  
   ;; Remove margin bookmark
   (advice-remove #'bookmark--set-fringe-mark
                  #'org-margin--set-margin-mark)
+
+  (font-lock-update))
+
+(defvar-local org-margin--font-lock-extra-managed-props nil
+  "font-lock-extra-managed-props before enterign org margin mode")
   
-  ;; Restore org mode
-  (org-mode))
+(defvar-local org-margin--left-margin-width nil
+  "left-wargin-width before enterign org margin mode")
+
+(defvar-local org-margin--font-lock-keywords font-lock-keywords
+  "font-lock-keywords before enterign org margin mode")
 
 (defun org-margin-mode-on ()
   "Activate margin mode"
@@ -141,12 +151,13 @@ activated for changes to take effect."
     (error "org margin mode is not compatible with org-indent-mode"))
 
   ;; Make sure these properties are handled by font-lock
+  (setq-local org-margin--font-lock-extra-managed-props font-lock-extra-managed-props)
   (add-to-list 'font-lock-extra-managed-props 'display)
   (add-to-list 'font-lock-extra-managed-props 'wrap-prefix)
   (add-to-list 'font-lock-extra-managed-props 'line-prefix)
 
   ;; Reset org mode font lock before adding our own keywords
-  (org-mode)
+  ;; (org-mode)
     
   (let* ((header-set (cdr (assoc org-margin-headers-set org-margin-headers)))
          (header-widths (mapcar
@@ -168,9 +179,12 @@ activated for changes to take effect."
     ;; Margin text is aligned to the left. We thus add 1 to the
     ;; max-width in order to have a single space between prefix and
     ;; header.
+    (setq-local org-margin--left-margin-width left-margin-width)
     (set-window-margins (selected-window) (1+ max-width))
     (setq-local left-margin-width (1+ max-width))
 
+    (setq-local org-margin--font-lock-keywords font-lock-keywords)
+    
     ;; Add header markers
     (when (> max-level 0)
       (font-lock-add-keywords nil
